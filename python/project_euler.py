@@ -123,15 +123,12 @@ def solution(func):
     with Measure("Main Calculation"):
         sol = func()
 
-    # Cyan text for the label, Magenta for the value
-    CYAN = "\033[96m"
-    MAGENTA = "\033[95m"
+    # \033[44;1;37m = Blue Background, Bold White Text
+    HEADER = "\033[44;1;37m"
     RESET = "\033[0m"
 
-    print("")
-    print(f"{CYAN}🚀{'-'*10} {MAGENTA}RESULT FOUND{CYAN} {'-'*10}")
-    print(f"{MAGENTA}💎 ❯❯ {RESET}{sol}")
-    print(f"{CYAN}{'━'*34}{RESET}")
+    print(f"\n{HEADER}  🏆  SOLUTION IDENTIFIED  {RESET}")
+    print(f"  ➥  {sol}\n")
 
     return sol
 
