@@ -136,8 +136,21 @@ def solution(func):
     return sol
 
 def validation(func):
+    count_errs = 0
     with Measure("Validation"):
-        func()
+        try:
+            func()
+        except AssertionError as e:
+            ERR = "\033[1;97;41m"
+            # Red Text
+            TXT = "\033[91m"
+            RST = "\033[0m"
+
+            print(f"\n{ERR} ⚡ VALIDATION FAILED ⚡ {RST}")
+            print(f"{TXT}▶ REASON: {RST}{str(e) or "assert failed"}")
+            print(f"{TXT}━━━━━━━━━━━━━━━━━━━━━━{RST}\n")
+
+            raise e
 
 class Test:
     def equals(expected, func, *args, **kwargs):
