@@ -152,6 +152,15 @@ def validation(func):
 
             raise e
 
+        # Green Background + White Bold Text
+        GO = "\033[1;97;42m"
+        # Green Text
+        TXT = "\033[92m"
+        RST = "\033[0m"
+
+        print(f"\n{GO} ✨ VALIDATION PASSED ✨ {RST}")
+        print(f"{TXT}━━━━━━━━━━━━━━━━━━━━━━{RST}\n")
+
 class Test:
     def equals(expected, func, *args, **kwargs):
         calc = func(*args, **kwargs)
