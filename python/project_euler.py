@@ -1,5 +1,4 @@
 import time
-from common.common import BoundedQueue
 import random
 import itertools
 import pyperclip
@@ -15,7 +14,6 @@ class Progress:
         self._announce_every_seconds = announce_every_seconds
         self._on_demand_only = on_demand_only
         self._bar_len = bar_len
-        self._timestamps = BoundedQueue(measure_window)
 
     def in_case(condition, iterable, *args, **kwargs):
         if condition:
@@ -38,7 +36,6 @@ class Progress:
         self._i = None
         self._next_announce = 0
         self._announce_every_len = int(self._announce_every * self._len)
-        self._timestamps.insert(time.time())
         self._start_time = time.time()
         self._next_announce_seconds = self._announce_every_seconds
         print("%s going to iterate over %s elements" % (self._op_name, self._len))
@@ -51,22 +48,14 @@ class Progress:
     def elapsed_time(self):
         return time.time() - self._start_time
     
-    def estimate_time_to_completion(self):
-        now = time.time()
-        then = self._timestamps.observe()
-        i, _ = self._i
-        return (now - then)*(self._len-i)/len(self._timestamps)
-    
     def show_progress(self):
         i, _ = self._i
         perc = round(float(i) * 100 / self._len, 2)
-        #print("%s progress: %s/%s %s (%s%%, estimated time to completion: %ss)" % (self._op_name, i, self._len, self.bar(), perc, round(self.estimate_time_to_completion(),2)))
         print("%s completed: %s/%s %s (%s%%)" % (self._op_name, i, self._len, self.bar(), perc))
     
     def __next__(self):
         self._i = next(self._enumerator)
         i, _ = self._i
-        #self._timestamps.insert(time.time(), extract_if_queue_is_full=True)
         should_announce = False
 
         if not self._on_demand_only:        
