@@ -122,9 +122,17 @@ class Measure:
 def solution(func):
     with Measure("Main Calculation"):
         sol = func()
-    print("<===== SOLUTION: %s =====>" % sol)
-    print("[num chars in solution: %s]" % len(str(sol)))
-    #pyperclip.copy(f"{sol}")
+
+    # Cyan text for the label, Magenta for the value
+    CYAN = "\033[96m"
+    MAGENTA = "\033[95m"
+    RESET = "\033[0m"
+
+    print("")
+    print(f"{CYAN}🚀{'-'*10} {MAGENTA}RESULT FOUND{CYAN} {'-'*10}")
+    print(f"{MAGENTA}💎 ❯❯ {RESET}{sol}")
+    print(f"{CYAN}{'━'*34}{RESET}")
+
     return sol
 
 def validation(func):
