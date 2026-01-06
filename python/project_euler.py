@@ -118,6 +118,10 @@ class Measure:
             t = round(self.exited - self.entered, 3)
             return "operation '%s' took %s sec." % (self.msg, t)
 
+def str_percentage(frac, total, rounded=2):
+    assert frac >= 0
+    assert total > 0
+    return f"{frac}/{total} ({round(frac*100/total, rounded)}%)"
 
 def solution(func):
     with Measure("Main Calculation"):
