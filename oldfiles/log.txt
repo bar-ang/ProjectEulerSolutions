@@ -1,0 +1,2 @@
+operation 'combinations' took 392.79 sec.
+4380207916617855
