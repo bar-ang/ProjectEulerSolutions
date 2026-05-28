@@ -252,6 +252,14 @@ def validation(func):
         print(f"{TXT}━━━━━━━━━━━━━━━━━━━━━━{RST}\n")
 
 class Test:
+    def almost_equals(expected, func, *, precision, **kwargs):
+        expected = round(expected, precision)
+        calc = round(func(**kwargs), precision)
+        str_args = ",".join([f"{k}={v}" for k, v in kwargs.items()])
+        func_str = f"{func.__name__}({str_args})={calc}"
+        assert calc == expected, f"{func_str}, not {expected}"
+        #print(f"{func_str} as expected!")
+
     def equals(expected, func, *args, **kwargs):
         calc = func(*args, **kwargs)
         str_args = ",".join([str(a) for a in args] + [f"{k}={v}" for k, v in kwargs.items()])
