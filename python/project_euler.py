@@ -282,4 +282,7 @@ class Test:
 
         for tup in itertools.product(*args):
             Test.funcs_equal(f1, f2, *tup)        
+
+
+Testing = Test
         
