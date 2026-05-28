@@ -1,7 +1,96 @@
 import time
 import random
 import itertools
-import pyperclip
+try:
+    import pyperclip
+except ModuleNotFoundError:
+    pyperclip = None
+
+
+def export_binary_tree_png(root, path, *, left="left", right="right", value=str,
+                           node_radius=18, x_spacing=56, y_spacing=72,
+                           margin=32, background="white", node_fill="#f5f5f5",
+                           node_outline="black", edge_fill="black",
+                           text_fill="black"):
+    """
+    Export a binary tree to a PNG file.
+
+    By default this expects each node to have left/right attributes. If your
+    nodes use different names, pass left="_left", right="_right", etc. Accessors
+    can also be callables. The value argument can be a callable or an attribute
+    name.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+
+    if root is None:
+        raise ValueError("cannot export an empty tree")
+
+    def read(node, accessor):
+        if callable(accessor):
+            return accessor(node)
+        return getattr(node, accessor)
+
+    def label(node):
+        if callable(value):
+            return str(value(node))
+        return str(getattr(node, value))
+
+    positions = {}
+    nodes = []
+    next_x = 0
+
+    def place(node, depth=0):
+        nonlocal next_x
+        if node is None:
+            return
+
+        lchild = read(node, left)
+        rchild = read(node, right)
+        place(lchild, depth + 1)
+
+        nodes.append(node)
+        positions[id(node)] = (next_x, depth)
+        next_x += 1
+
+        place(rchild, depth + 1)
+
+    place(root)
+
+    max_depth = max(depth for _, depth in positions.values())
+    width = max(1, next_x - 1) * x_spacing + margin * 2 + node_radius * 2
+    height = max_depth * y_spacing + margin * 2 + node_radius * 2
+    img = Image.new("RGB", (width, height), background)
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.load_default()
+
+    def pixel_pos(node):
+        x, y = positions[id(node)]
+        return margin + node_radius + x * x_spacing, margin + node_radius + y * y_spacing
+
+    for node in nodes:
+        x1, y1 = pixel_pos(node)
+        for child in (read(node, left), read(node, right)):
+            if child is not None:
+                x2, y2 = pixel_pos(child)
+                draw.line((x1, y1, x2, y2), fill=edge_fill, width=2)
+
+    for node in nodes:
+        x, y = pixel_pos(node)
+        draw.ellipse(
+            (x - node_radius, y - node_radius, x + node_radius, y + node_radius),
+            fill=node_fill,
+            outline=node_outline,
+            width=2,
+        )
+
+        text = label(node)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        draw.text((x - tw / 2, y - th / 2), text, fill=text_fill, font=font)
+
+    img.save(path, "PNG")
+    return path
+
 
 class Progress:
     def __init__(self, iterable, op_name="iterating", *, announce_every=7, announce_every_seconds=43, on_demand_only=False, bar_len=25, iterable_len=None, measure_window=1000, noise=True):
