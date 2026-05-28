@@ -14,7 +14,6 @@ def Q_recursive(n, d):
 
     q = Q_recursive
     a, res = min(((t, minimize(t)) for t in range(1, n)), key=lambda x: x[1])
-    print(a)
     return 1 + res
 
 
@@ -36,11 +35,11 @@ def Q_dynamic(nlim, dlim):
                 q[n][d] = q[n][n]
                 continue
 
-            a = min([d, (n+1)//2], key=minimize)
-
-
-            #print(n, n//2, a, d)
-
+            if d < (n+1)//2:
+                a = min(range(d, (n+1)//2+1), key=minimize)
+            else:
+                a = (n+1)//2
+           # a = min(range(1, n), key=minimize)
             t = 1 + minimize(a)
             q[n][d] = t
 
@@ -50,15 +49,28 @@ def Q_dynamic(nlim, dlim):
 @validation
 def validate():
     Test.equals(3, Q_recursive, 7, 1)
+    Test.equals(3, Q_recursive, 5, 2)
     #Test.equals(10, Q_recursive, 777, 2)
 
-    maxn = 30
-    maxd = 2
+    print("first test")
+    maxn = 17
+    maxd = 3
     q = Q_dynamic(maxn, maxd)
     for _, i in Progress(range(1, maxn)):
         for j in range(1, min(i+1, maxd)):
-            print("new")
             assert q[i][j] == Q_recursive(i, j), (q[i][j], Q_recursive(i, j), i, j)
+
+    print("second test")
+    maxn = 13
+    maxd = 13
+    q = Q_dynamic(maxn, maxd)
+    for _, i in Progress(range(1, maxn)):
+        for j in range(1, min(i+1, maxd)):
+            assert q[i][j] == Q_recursive(i, j), (q[i][j], Q_recursive(i, j), i, j)
+
+    print("DO NOT GET STUCK!")
+    with Measure("allocating"):
+        q = [0 for _, _ in Progress(range(7 ** 11))]
 
 @solution
 def solve():
