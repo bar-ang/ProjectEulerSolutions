@@ -25,25 +25,13 @@ W = Desc.WHITE
 D = Desc.DEBUG
 X = Desc.SPLIT
 
-#def binary_to_desc(encoded):
-#    descs = []
-#    pos = 0
-#    while pos < len(encoded):
-#        if encoded[pos] == "0":
-#            descs.append(Desc.SPLIT)
-#            pos += 1
-#        else:
-#            descs.append(Desc.BLACK if encoded[pos + 1] == "0" else Desc.WHITE)
-#            pos += 2
-#    return descs
-
-
 LEAF_COLORS = {
     Desc.BLACK: (0, 0, 0),
     Desc.WHITE: (255, 255, 255),
     Desc.DEBUG: (0, 0, 255),  # blue, for debugging only - not part of the encoding
 }
 
+circle = lambda x, y, k: (x-2**(k-1))**2 + (y-2**(k-1))**2 <= 4 ** (k-1)
 
 def draw_quadtree(descs, n, pixel_size=10, shade_by_depth=False):
     size = 2 ** (n+1)
@@ -88,10 +76,6 @@ def draw_quadtree(descs, n, pixel_size=10, shade_by_depth=False):
 
     return img
 
-circle = lambda x, y, k: (x-2**(k-1))**2 + (y-2**(k-1))**2 <= 4 ** (k-1)
-infi = lambda x, y, k: ((1.5*x-1)**2+y**2) * ((1.5*x+1)**2+y**2) <= 1
-
-
 def encode_area(area, n, *, x=1, y=1, k=1):
     nxt = [
         (-1,  0),
@@ -117,7 +101,7 @@ def encode_area(area, n, *, x=1, y=1, k=1):
         for ttt in nxt:
             ox, oy = ttt
             if area(x+ox+1, y+oy+1, k) == area(x+ox+1, y+oy, k) == area(x+ox, y+oy+1, k) == area(x+ox, y+oy, k):
-                res.append(B if area(x, y, k) else W)
+                res.append(B if area(x+ox, y+oy, k) else W)
             else:
                 res += encode_area(area, n, x=2*(x+ox)+1, y=2*(y+oy)+1, k=k+1)
 
@@ -173,13 +157,9 @@ def validate():
 
 @solution
 def solve():
-    n = 23
+    n = 24
     with Measure("encoding"):
         uc = encode_area(circle, n)
-    print(uc[:200])
-    import json
-    with open("quadtree_solution.json", "w") as f:
-        json.dump([str(c) for c in uc], f)
     with Measure("calc length"):
         l = sum([1 if c == Desc.SPLIT else 2 for c in uc])
     return l
