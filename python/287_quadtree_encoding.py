@@ -102,56 +102,30 @@ def encode_area(area, n, *, x=1, y=1, k=1):
 
     res = [X]
     if n == k:
-        if n== 2:
-            import pdb; pdb.set_trace()
         for t in nxt:
             ox, oy = t
             res.append(B if area(x+ox, y+oy, k) else W)
 
     else:
-        for t in nxt:
-            ox, oy = t
-            res += encode_area(area, n, x=2*(x+ox)+1, y=2*(y+oy)+1, k=k+1)
+        sq = [
+            ( 1,  1),
+            (-1,  1),
+            ( 1, -1),
+            (-1, -1)
+        ]
+
+        for ttt in nxt:
+            ox, oy = ttt
+            if area(x+ox+1, y+oy+1, k) == area(x+ox+1, y+oy, k) == area(x+ox, y+oy+1, k) == area(x+ox, y+oy, k):
+                res.append(B if area(x, y, k) else W)
+            else:
+                res += encode_area(area, n, x=2*(x+ox)+1, y=2*(y+oy)+1, k=k+1)
 
     if res == [X, B, B, B, B]:
         res = [B]
 
     if res == [X, W, W, W, W]:
         res = [W]
-
-    return res
-
-def _encode_area(area, n, *, x=1, y=1, k=1):
-    if n < k:
-        if area(x, y, k):
-            return [B]
-        else:
-            return [W]
-
-    nxt = [
-        (-1,  0),
-        ( 0,  0),
-        (-1, -1),
-        ( 0, -1)
-    ]
-
-
-    res = [X]
-
-    for t in nxt:
-        ox, oy = t
-        res += encode_area(area, n, x=2*x+ox, y=2*y+oy, k=k+1)
-        #if area(x+t[0], y+t[1], k) == area(x, y, k) and area(x, y+t[1], k) == area(x, y, k) and area(x+t[0], y, k) == area(x, y, k):
-        #    color = B if area(x+t[0], y+t[1], k) else W
-        #    res.append(color)
-        #else:
-        #    res += encode_area(area, n, x=2*x+t[0], y=2*y+t[1], k=k+1)
-
-    #if res == [X, B, B, B, B]:
-    #    res = [B]
-
-    #if res == [X, W, W, W, W]:
-    #    res = [W]
 
     return res
 
@@ -166,14 +140,27 @@ def validate():
     assert n1 == [X, B, B, W, B], n1
     n2 = encode_area(circle, 2)
     assert n2 == [X, X, W, B, B, B, B, X, W, B, W, W, X, B, B, B, W], n2
+    n3 = encode_area(circle, 3)
+    assert n3 == [X, X, X, W, W, W, B, B, X, W, B, B, B, B, X, B, X, B, W, B, B, B, B, X, X, W, B, W, B, B, W, X, B, B, W, W, X, B, B, X, B, B, B, W, X, B, W, W, W], n3
+    n4 = encode_area(circle, 4)
+    assert len(n4) == 121, len(n4)
+    assert n4 == [X, X, X, W, X, W, W, W, B, W, B, X, X, W, B, B, B, B, B, B, X, X, W, B, W, B, B, X, W, B, B, B, B, B, X, B, X, X, W, W, B, B, W, B, X, B, W, B, W, B, B, X, X, X, W, B, W, B, B, X, W, B, W, W, B, B, X, W, X, B, B, W, B, W, W, X, B, B, X, W, B, W, W, X, B, B, W, W, X, B, X, B, B, B, X, B, B, B, W, X, B, B, X, B, B, B, W, X, B, B, W, W, X, B, X, B, W, W, W, W, W], n4
 
-    for n in range(3, 9):
+    for n in range(3, 11):
         uc = encode_area(circle, n)
         assert not contains(uc, [X, B, B, B, B]) and not contains(uc, [X, W, W, W, W])
 
 
 
     n = 2
+    pxsize = 100//n
+    ucn = encode_area(circle, n)
+    print(ucn)
+    t = draw_quadtree(ucn, n, pixel_size=pxsize, shade_by_depth=True)
+    print(t.size)
+    assert t.size[0] == t.size[1] == 2 ** (n+1) * pxsize
+    t.show()
+    n = 7
     pxsize = 100//n
     ucn = encode_area(circle, n)
     print(ucn)
@@ -190,6 +177,9 @@ def solve():
     with Measure("encoding"):
         uc = encode_area(circle, n)
     print(uc[:200])
+    import json
+    with open("quadtree_solution.json", "w") as f:
+        json.dump([str(c) for c in uc], f)
     with Measure("calc length"):
         l = sum([1 if c == Desc.SPLIT else 2 for c in uc])
     return l
